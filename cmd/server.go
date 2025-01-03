@@ -152,6 +152,7 @@ const (
 	TFELocalExecutionModeFlag        = "tfe-local-execution-mode"
 	TFETokenFlag                     = "tfe-token"
 	WriteGitCredsFlag                = "write-git-creds" // nolint: gosec
+	WebhookHttpAuthHeader            = "webhook-http-auth-header"
 	WebBasicAuthFlag                 = "web-basic-auth"
 	WebUsernameFlag                  = "web-username"
 	WebPasswordFlag                  = "web-password"
@@ -454,6 +455,11 @@ var stringFlags = map[string]stringFlag{
 	VCSStatusName: {
 		description:  "Name used to identify Atlantis for pull request statuses.",
 		defaultValue: DefaultVCSStatusName,
+	},
+	WebhookHttpAuthHeader: {
+		description: "Enable auth on HTTP webhook and pass this value as the Authorization header." +
+			" For example: `Basic <credentials>` or `Bearer <token>`.",
+		defaultValue: "",
 	},
 	WebUsernameFlag: {
 		description:  "Username used for Web Basic Authentication on Atlantis HTTP Middleware",

@@ -119,6 +119,7 @@ type UserConfig struct {
 	VCSStatusName              string          `mapstructure:"vcs-status-name"`
 	DefaultTFVersion           string          `mapstructure:"default-tf-version"`
 	Webhooks                   []WebhookConfig `mapstructure:"webhooks" flag:"false"`
+	WebhookHttpAuthHeader      string          `mapstructure:"webhook-http-auth-header"`
 	WebBasicAuth               bool            `mapstructure:"web-basic-auth"`
 	WebUsername                string          `mapstructure:"web-username"`
 	WebPassword                string          `mapstructure:"web-password"`
