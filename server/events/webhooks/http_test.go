@@ -1,11 +1,9 @@
 package webhooks_test
 
 import (
-	"maps"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
-	"slices"
 	"testing"
 
 	"github.com/runatlantis/atlantis/server/events/models"
@@ -30,18 +28,23 @@ var httpApplyResult = webhooks.ApplyResult{
 	Success: true,
 }
 
-func TestHttpWebhookWithAuth(t *testing.T) {
-	authHeader := "Bearer token"
+func TestHttpWebhookWithHeaders(t *testing.T) {
+	expectedHeaders := map[string][]string{
+		"Authorization":   {"Bearer token"},
+		"X-Custom-Header": {"value1", "value2"},
+	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		Equals(t, r.Header.Get("Content-Type"), "application/json")
-		Equals(t, r.Header.Get("Authorization"), authHeader)
+		for k, v := range expectedHeaders {
+			Equals(t, r.Header.Values(k), v)
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
 
 	webhook := webhooks.HttpWebhook{
-		Client:         webhooks.NewHttpClient(authHeader),
+		Client:         webhooks.NewHttpClient(expectedHeaders),
 		URL:            server.URL,
 		WorkspaceRegex: regexp.MustCompile(".*"),
 		BranchRegex:    regexp.MustCompile(".*"),
@@ -51,16 +54,15 @@ func TestHttpWebhookWithAuth(t *testing.T) {
 	Ok(t, err)
 }
 
-func TestHttpWebhookNoAuth(t *testing.T) {
+func TestHttpWebhookNoHeaders(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		Equals(t, r.Header.Get("Content-Type"), "application/json")
-		Assert(t, !slices.Contains(slices.Collect(maps.Keys(r.Header)), "Authorization"), "Authorization header should be absent")
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
 
 	webhook := webhooks.HttpWebhook{
-		Client:         webhooks.NewHttpClient(""),
+		Client:         webhooks.NewHttpClient(nil),
 		URL:            server.URL,
 		WorkspaceRegex: regexp.MustCompile(".*"),
 		BranchRegex:    regexp.MustCompile(".*"),
@@ -73,7 +75,6 @@ func TestHttpWebhookNoAuth(t *testing.T) {
 func TestHttpWebhookDefaultClient(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		Equals(t, r.Header.Get("Content-Type"), "application/json")
-		Assert(t, !slices.Contains(slices.Collect(maps.Keys(r.Header)), "Authorization"), "Authorization header should be absent")
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
@@ -96,7 +97,7 @@ func TestHttpWebhook500(t *testing.T) {
 	defer server.Close()
 
 	webhook := webhooks.HttpWebhook{
-		Client:         webhooks.NewHttpClient(""),
+		Client:         webhooks.NewHttpClient(nil),
 		URL:            server.URL,
 		WorkspaceRegex: regexp.MustCompile(".*"),
 		BranchRegex:    regexp.MustCompile(".*"),
@@ -132,7 +133,7 @@ func TestHttpNoRegexMatch(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			webhook := webhooks.HttpWebhook{
-				Client:         webhooks.NewHttpClient(""),
+				Client:         webhooks.NewHttpClient(nil),
 				URL:            server.URL,
 				WorkspaceRegex: tc.wr,
 				BranchRegex:    tc.br,

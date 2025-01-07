@@ -384,11 +384,15 @@ func NewServer(userConfig UserConfig, config Config) (*Server, error) {
 		}
 		webhooksConfig = append(webhooksConfig, config)
 	}
+	webhookHeaders, err := userConfig.ToWebhookHttpHeaders()
+	if err != nil {
+		return nil, errors.Wrap(err, "parsing webhook http headers")
+	}
 	webhooksManager, err := webhooks.NewMultiWebhookSender(
 		webhooksConfig,
 		webhooks.Clients{
 			Slack: webhooks.NewSlackClient(userConfig.SlackToken),
-			Http:  webhooks.NewHttpClient(userConfig.WebhookHttpAuthHeader),
+			Http:  webhooks.NewHttpClient(webhookHeaders),
 		},
 	)
 	if err != nil {
