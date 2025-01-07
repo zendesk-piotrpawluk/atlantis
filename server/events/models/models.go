@@ -19,7 +19,6 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	paths "path"
@@ -43,24 +42,24 @@ type Repo struct {
 	// FullName is the owner and repo name separated
 	// by a "/", ex. "runatlantis/atlantis", "gitlab/subgroup/atlantis",
 	// "Bitbucket Server/atlantis", "azuredevops/project/atlantis".
-	FullName string `json:"full_name"`
+	FullName string
 	// Owner is just the repo owner, ex. "runatlantis" or "gitlab/subgroup"
 	// or azuredevops/project. This may contain /'s in the case of GitLab
 	// subgroups or Azure DevOps Team Projects. This may contain spaces in
 	// the case of Bitbucket Server.
-	Owner string `json:"owner"`
+	Owner string
 	// Name is just the repo name, ex. "atlantis". This will never have
 	// /'s in it.
-	Name string `json:"name"`
+	Name string
 	// CloneURL is the full HTTPS url for cloning with username and token string
 	// ex. "https://username:token@github.com/atlantis/atlantis.git".
-	CloneURL string `json:"clone_url"`
+	CloneURL string
 	// SanitizedCloneURL is the full HTTPS url for cloning with the password
 	// redacted.
 	// ex. "https://user:<redacted>@github.com/atlantis/atlantis.git".
-	SanitizedCloneURL string `json:"sanitized_clone_url"`
+	SanitizedCloneURL string
 	// VCSHost is where this repo is hosted.
-	VCSHost VCSHost `json:"vcs_host"`
+	VCSHost VCSHost
 }
 
 // ID returns the atlantis ID for this repo.
@@ -156,29 +155,29 @@ type ApprovalStatus struct {
 // GitLab calls these Merge Requests.
 type PullRequest struct {
 	// Num is the pull request number or ID.
-	Num int `json:"num"`
+	Num int
 	// HeadCommit is a sha256 that points to the head of the branch that is being
 	// pull requested into the base. If the pull request is from Bitbucket Cloud
 	// the string will only be 12 characters long because Bitbucket Cloud
 	// truncates its commit IDs.
-	HeadCommit string `json:"head_commit"`
+	HeadCommit string
 	// URL is the url of the pull request.
 	// ex. "https://github.com/runatlantis/atlantis/pull/1"
-	URL string `json:"url"`
+	URL string
 	// HeadBranch is the name of the head branch (the branch that is getting
 	// merged into the base).
-	HeadBranch string `json:"head_branch"`
+	HeadBranch string
 	// BaseBranch is the name of the base branch (the branch that the pull
 	// request is getting merged into).
-	BaseBranch string `json:"base_branch"`
+	BaseBranch string
 	// Author is the username of the pull request author.
-	Author string `json:"author"`
+	Author string
 	// State will be one of Open or Closed.
 	// Gitlab supports an additional "merged" state but Github doesn't so we map
 	// merged to Closed.
-	State PullRequestState `json:"state"`
+	State PullRequestState
 	// BaseRepo is the repository that the pull request will be merged into.
-	BaseRepo Repo `json:"base_repo"`
+	BaseRepo Repo
 }
 
 // PullRequestOptions is used to set optional paralmeters for PullRequest
@@ -197,43 +196,6 @@ const (
 	OpenPullState PullRequestState = iota
 	ClosedPullState
 )
-
-func (s PullRequestState) String() string {
-	switch s {
-	case OpenPullState:
-		return "open"
-	case ClosedPullState:
-		return "closed"
-	}
-	return "<missing String() implementation>"
-}
-
-func (s PullRequestState) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
-}
-
-func (s *PullRequestState) UnmarshalJSON(b []byte) error {
-	var str string
-	if err := json.Unmarshal(b, &str); err != nil {
-		return err
-	}
-	v, err := NewPullRequestState(str)
-	if err != nil {
-		return err
-	}
-	*s = v
-	return nil
-}
-
-func NewPullRequestState(t string) (PullRequestState, error) {
-	switch t {
-	case "open":
-		return OpenPullState, nil
-	case "closed":
-		return ClosedPullState, nil
-	}
-	return -1, fmt.Errorf("%q is not a valid type", t)
-}
 
 type PullRequestEventType int
 
@@ -261,8 +223,8 @@ func (p PullRequestEventType) String() string {
 // User is a VCS user.
 // During an autoplan, the user will be the Atlantis API user.
 type User struct {
-	Username string   `json:"username"`
-	Teams    []string `json:"teams"`
+	Username string
+	Teams    []string
 }
 
 // ProjectLock represents a lock on a project.
@@ -332,10 +294,10 @@ func NewProject(repoFullName string, path string, projectName string) Project {
 type VCSHost struct {
 	// Hostname is the hostname of the VCS provider, ex. "github.com" or
 	// "github-enterprise.example.com".
-	Hostname string `json:"hostname"`
+	Hostname string
 
 	// Type is which type of VCS host this is, ex. GitHub or GitLab.
-	Type VCSHostType `json:"type"`
+	Type VCSHostType
 }
 
 type VCSHostType int
@@ -365,23 +327,6 @@ func (h VCSHostType) String() string {
 		return "Gitea"
 	}
 	return "<missing String() implementation>"
-}
-
-func (h VCSHostType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(h.String())
-}
-
-func (h *VCSHostType) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return err
-	}
-	v, err := NewVCSHostType(s)
-	if err != nil {
-		return err
-	}
-	*h = v
-	return nil
 }
 
 func NewVCSHostType(t string) (VCSHostType, error) {

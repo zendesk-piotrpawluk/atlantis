@@ -38,12 +38,12 @@ type Sender interface {
 
 // ApplyResult is the result of a terraform apply.
 type ApplyResult struct {
-	Workspace string             `json:"workspace"`
-	Repo      models.Repo        `json:"repo"`
-	Pull      models.PullRequest `json:"pull_request"`
-	User      models.User        `json:"user"`
-	Success   bool               `json:"success"`
-	Directory string             `json:"directory"`
+	Workspace string
+	Repo      models.Repo
+	Pull      models.PullRequest
+	User      models.User
+	Success   bool
+	Directory string
 }
 
 // MultiWebhookSender sends multiple webhooks for each one it's configured for.
