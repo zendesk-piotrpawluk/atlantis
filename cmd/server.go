@@ -457,8 +457,9 @@ var stringFlags = map[string]stringFlag{
 		defaultValue: DefaultVCSStatusName,
 	},
 	WebhookHttpHeaders: {
-		description: "Enable auth on HTTP webhook and pass this value as the Authorization header." +
-			" For example: `Basic <credentials>` or `Bearer <token>`.",
+		description: "Additional headers added to each HTTP POST payload when using HTTP webhooks provided as a JSON string." +
+			" The map key is the header name and the value is the header value (string) or values (array of string)." +
+			" For example: `{\"Authorization\":\"Bearer some-token\",\"X-Custom-Header\":[\"value1\",\"value2\"]}`.",
 		defaultValue: "",
 	},
 	WebUsernameFlag: {
